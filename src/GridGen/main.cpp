@@ -157,7 +157,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
     }
     input_files.back().setNumSamplesPerChannel(last_index + 1);
 
-    if (maxLength < input_files.back().getLengthInSeconds())
+    if (maxLength > 0 && maxLength < input_files.back().getLengthInSeconds())
         input_files.back().setNumSamplesPerChannel(int(input_files.back().getSampleRate() * maxLength));
     
     //find longest sample
