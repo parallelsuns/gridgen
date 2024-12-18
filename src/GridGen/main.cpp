@@ -130,7 +130,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
   if (input_filenames.size() == 0) return;
   std::vector<AudioFile<float>> input_files;
   input_files.reserve(input_filenames.size());
-  int longest_len = 0;
+  float longest_len = 0;
 
   for (size_t i = 0; i < input_filenames.size(); ++i)
   {
@@ -161,7 +161,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
         input_files.back().setNumSamplesPerChannel(int(input_files.back().getSampleRate() * maxLength));
     
     //find longest sample
-    if (input_files.back().getNumSamplesPerChannel() > longest_len) longest_len = input_files.back().getNumSamplesPerChannel();
+    if (input_files.back().getLengthInSeconds() > longest_len) longest_len = input_files.back().getLengthInSeconds();
   }
 
   //Change channel count accordingly
@@ -217,7 +217,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
 
   //resize all files to longest length
   for (size_t i = 0; i < input_files.size(); ++i)
-      input_files[i].setNumSamplesPerChannel(longest_len);
+      input_files[i].setNumSamplesPerChannel(int(longest_len * outputSamplerate));
 
 
   int slices = std::max((unsigned int)input_files.size(), minGridSz);
@@ -225,7 +225,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
   output.setNumChannels(channelMode == 0 ? 2 : 1);
   output.setBitDepth(outputBitDepth);
   output.setSampleRate(outputSamplerate);
-  output.setNumSamplesPerChannel(slices * longest_len);
+  output.setNumSamplesPerChannel(int(slices * longest_len * outputSamplerate));
   for (int ch = 0; ch < output.getNumChannels(); ++ch)
   {
       size_t output_iter = 0;
