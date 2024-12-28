@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by WindowsProject1.rc
+// Used by GridGen.rc
 //
 #define IDC_MYICON                      2
 #define IDD_WINDOWSPROJECT1_DIALOG      102
@@ -18,6 +18,8 @@
 #define ID_EXIT                         1003
 #define IDC_FILECOUNT                   1004
 #define IDC_MAXLENGTH                   1005
+#define IDC_MAXLENGTH2                  1006
+#define IDC_PITCHSHIFT                  1006
 #define IDC_CHANNELS                    1007
 #define IDC_COMBO1                      1008
 #define IDC_BITDEPTH                    1008

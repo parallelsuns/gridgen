@@ -27,7 +27,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
  //=======================================================================
-
+#
 #include "framework.h"
 #include "AudioFile.h"
 #include "GridGen.h"
@@ -36,6 +36,7 @@
 #include <windowsx.h>
 #include <string>
 #include "libsamplerate/samplerate.h"
+#include "signalsmith-stretch-main/signalsmith-stretch.h"
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -54,6 +55,7 @@ unsigned int minGridSz = 0;
 unsigned int channelMode = 0;
 int outputBitDepth = 16;
 int outputSamplerate = 44100;
+float pitchshift = 0;
 float maxLength = 0;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -130,7 +132,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
   if (input_filenames.size() == 0) return;
   std::vector<AudioFile<float>> input_files;
   input_files.reserve(input_filenames.size());
-  float longest_len = 0;
+  int longest_len = 0;
 
   for (size_t i = 0; i < input_filenames.size(); ++i)
   {
@@ -161,7 +163,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
         input_files.back().setNumSamplesPerChannel(int(input_files.back().getSampleRate() * maxLength));
     
     //find longest sample
-    if (input_files.back().getLengthInSeconds() > longest_len) longest_len = input_files.back().getLengthInSeconds();
+    if (input_files.back().getNumSamplesPerChannel() > longest_len) longest_len = input_files.back().getNumSamplesPerChannel();
   }
 
   //Change channel count accordingly
@@ -217,7 +219,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
 
   //resize all files to longest length
   for (size_t i = 0; i < input_files.size(); ++i)
-      input_files[i].setNumSamplesPerChannel(int(longest_len * outputSamplerate));
+      input_files[i].setNumSamplesPerChannel(longest_len);
 
 
   int slices = std::max((unsigned int)input_files.size(), minGridSz);
@@ -225,7 +227,7 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
   output.setNumChannels(channelMode == 0 ? 2 : 1);
   output.setBitDepth(outputBitDepth);
   output.setSampleRate(outputSamplerate);
-  output.setNumSamplesPerChannel(int(slices * longest_len * outputSamplerate));
+  output.setNumSamplesPerChannel(slices * longest_len);
   for (int ch = 0; ch < output.getNumChannels(); ++ch)
   {
       size_t output_iter = 0;
@@ -237,6 +239,15 @@ void ExportSampleGrid(HWND hwnd, const std::string& output_path)
               ++output_iter;
           }
       }
+  }
+  if (abs(pitchshift) > 2 * FLT_EPSILON)
+  {
+      signalsmith::stretch::SignalsmithStretch<float> stretch;
+      auto shiftedBuf = output.samples;
+      stretch.presetDefault(output.getNumChannels(), output.getSampleRate());
+      stretch.setTransposeSemitones(pitchshift);
+      stretch.process(output.samples.data(), output.getNumSamplesPerChannel(), shiftedBuf.data(), output.getNumSamplesPerChannel());
+      output.samples = shiftedBuf;
   }
 
   AudioFileFormat format = AudioFileFormat::Wave;
@@ -309,6 +320,8 @@ void SaveFile(HWND hwnd)
   outputSamplerate = samplerates[ComboBox_GetCurSel(GetDlgItem(hwnd, IDC_SAMPLERATE))];
   GetWindowTextA(GetDlgItem(hwnd, IDC_MAXLENGTH), buf, sizeof(buf) / sizeof(char));
   maxLength = (float)std::max(std::atof(buf), 0.0);
+  GetWindowTextA(GetDlgItem(hwnd, IDC_PITCHSHIFT), buf, sizeof(buf) / sizeof(char));
+  pitchshift = std::atof(buf);
   ExportSampleGrid(hwnd, path);
 }
 
@@ -321,6 +334,7 @@ INT_PTR CALLBACK DialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_INITDIALOG:
         SetWindowTextA(GetDlgItem(hWnd, IDC_CHOOSEGRIDSIZE_INPUT), "0");
         SetWindowTextA(GetDlgItem(hWnd, IDC_MAXLENGTH), "0");
+        SetWindowTextA(GetDlgItem(hWnd, IDC_PITCHSHIFT), "0");
         for (auto iter : bitdepths)
             ComboBox_AddString(GetDlgItem(hWnd, IDC_BITDEPTH), std::to_wstring(iter).c_str()); 
         ComboBox_SetCurSel(GetDlgItem(hWnd, IDC_BITDEPTH), 0);

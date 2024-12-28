@@ -170,6 +170,18 @@
     <ClInclude Include="libsamplerate\mid_qual_coeffs.h" />
     <ClInclude Include="libsamplerate\samplerate.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\common.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\curves.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\delay.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\envelopes.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\fft.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\filters.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\mix.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\perf.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\rates.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\spectral.h" />
+    <ClInclude Include="signalsmith-stretch-main\dsp\windows.h" />
+    <ClInclude Include="signalsmith-stretch-main\signalsmith-stretch.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="GridGen.h" />
   </ItemGroup>
